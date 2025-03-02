@@ -53,31 +53,6 @@
         const terminal = document.getElementById("terminal");
         const inputField = document.getElementById("commandInput");
 
-        // WebSocket bağlantısını başlat
-        const ws = new WebSocket("ws://localhost:8080/ws");
-
-        ws.onopen = function () {
-            logToTerminal("Connected to WebSocket server...\n");
-        };
-
-        ws.onmessage = function (event) {
-            if (event.data === "ExecutionFinished") {
-                inputField.disabled = false; // Komut tamamlandı, giriş aktif hale gelsin
-                logToTerminal("\nExecution completed.");
-            } else {
-                logToTerminal(event.data);
-            }
-        };
-
-        ws.onclose = function () {
-            logToTerminal("\nDisconnected from server.");
-        };
-
-        ws.onerror = function (error) {
-            logToTerminal("\nWebSocket error: " + error);
-        };
-
-        // Terminale mesaj yazdırma fonksiyonu
         function logToTerminal(message) {
             const newLine = document.createElement("div");
             newLine.textContent = message;
@@ -85,25 +60,44 @@
             terminal.scrollTop = terminal.scrollHeight;
         }
 
-        // Kullanıcı komut girip Enter'a basınca çalıştır
-        inputField.addEventListener("keypress", function (event) {
-            if (event.key === "Enter" && !inputField.disabled) {
-                const command = inputField.value.trim();
-                if (command !== "") {
-                    logToTerminal("$ " + command);
-                    
-                    const request = JSON.stringify({
-                        user_id: "9999",
-                        command: command
-                    });
+        function sendCommand(command) {
+            if (command.trim() === "") return;
 
-                    ws.send(request);
-                    inputField.value = "";
-                    inputField.disabled = true; // Yeni komut tamamlanana kadar giriş alanını devre dışı bırak
+            logToTerminal("$ " + command);
+
+            // Yeni WebSocket bağlantısı oluştur
+            const ws = new WebSocket("ws://localhost:8080/ws");
+
+            ws.onopen = function () {
+                console.log("WebSocket connected");
+                ws.send(JSON.stringify({ user_id: "9999", command: command }));
+            };
+
+            ws.onmessage = function (event) {
+                if (event.data === "ExecutionFinished") {
+                    logToTerminal("\nExecution completed.");
+                    ws.close(); // Komut tamamlandığında bağlantıyı kapat
+                } else {
+                    logToTerminal(event.data);
                 }
+            };
+
+            ws.onerror = function (error) {
+                logToTerminal("\nWebSocket error: " + error);
+                console.error("WebSocket error:", error);
+            };
+
+            ws.onclose = function () {
+                logToTerminal("\nConnection closed.");
+            };
+        }
+
+        inputField.addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                sendCommand(inputField.value);
+                inputField.value = "";
             }
         });
-
     </script>
 </body>
 </html>

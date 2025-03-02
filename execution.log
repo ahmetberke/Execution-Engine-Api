@@ -74,3 +74,9 @@
 {"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T15:08:29+03:00"}
 {"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T15:08:29+03:00"}
 {"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T15:08:29+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T15:23:04+03:00"}
+{"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T15:23:04+03:00"}
+{"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T15:23:04+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T16:28:49+03:00"}
+{"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T16:28:49+03:00"}
+{"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T16:28:49+03:00"}
