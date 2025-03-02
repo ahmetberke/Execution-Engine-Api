@@ -1,0 +1,195 @@
+package main
+
+import (
+	"bufio"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"os/exec"
+	"strings"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
+)
+
+type CommandRequest struct {
+	UserID  string `json:"user_id"`
+	Command string `json:"command"`
+}
+
+type CommandResponse struct {
+	UserID string `json:"user_id"`
+	Output string `json:"output"`
+	Error  string `json:"error,omitempty"`
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func containerExists(containerName string) bool {
+	cmd := exec.Command("docker", "ps", "-a", "--format", "{{.Names}}")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Run()
+
+	containers := strings.Split(out.String(), "\n")
+	for _, name := range containers {
+		if name == containerName {
+			return true
+		}
+	}
+	return false
+}
+
+func containerRunning(containerName string) bool {
+	cmd := exec.Command("docker", "ps", "--format", "{{.Names}}")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Run()
+
+	containers := strings.Split(out.String(), "\n")
+	for _, name := range containers {
+		if name == containerName {
+			return true
+		}
+	}
+	return false
+}
+
+func ensureContainer(userID string) error {
+	containerName := "user_container_" + userID
+
+	if containerRunning(containerName) {
+		return nil
+	}
+
+	if containerExists(containerName) {
+		cmd := exec.Command("docker", "start", containerName)
+		return cmd.Run()
+	}
+
+	cmd := exec.Command("docker", "run", "-dit", "--name", containerName, "custom-ubuntu-python", "bash")
+	return cmd.Run()
+}
+
+func executeCommandInContainer(userID, command string) (string, error) {
+	containerName := "user_container_" + userID
+	cmd := exec.Command("docker", "exec", containerName, "bash", "-c", command)
+
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf(stderr.String())
+	}
+	return out.String(), nil
+}
+
+func executeCommandStream(userID, command string, conn *websocket.Conn) {
+	containerName := "user_container_" + userID
+	cmd := exec.Command("docker", "exec", containerName, "bash", "-c", command)
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		conn.WriteMessage(websocket.TextMessage, []byte("Error: " + err.Error()))
+		return
+	}
+
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		conn.WriteMessage(websocket.TextMessage, []byte("Error: " + err.Error()))
+		return
+	}
+
+	if err := cmd.Start(); err != nil {
+		conn.WriteMessage(websocket.TextMessage, []byte("Error: " + err.Error()))
+		return
+	}
+
+	scanner := bufio.NewScanner(stdout)
+	for scanner.Scan() {
+		message := scanner.Text()
+		if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
+			break
+		}
+	}
+
+	scannerErr := bufio.NewScanner(stderr)
+	for scannerErr.Scan() {
+		message := scannerErr.Text()
+		if err := conn.WriteMessage(websocket.TextMessage, []byte("Error: " + message)); err != nil {
+			break
+		}
+	}
+
+	cmd.Wait()
+	conn.WriteMessage(websocket.TextMessage, []byte("ExecutionFinished"))
+}
+
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("WebSocket upgrade failed:", err)
+		return
+	}
+	defer conn.Close()
+
+	for {
+		var req CommandRequest
+		err := conn.ReadJSON(&req)
+		if err != nil {
+			break
+		}
+
+		err = ensureContainer(req.UserID)
+		if err != nil {
+			conn.WriteMessage(websocket.TextMessage, []byte("Error: " + err.Error()))
+			continue
+		}
+
+		executeCommandStream(req.UserID, req.Command, conn)
+	}
+}
+
+func commandHandler(w http.ResponseWriter, r *http.Request) {
+	var req CommandRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	err = ensureContainer(req.UserID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error ensuring container: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	output, err := executeCommandInContainer(req.UserID, req.Command)
+	if err != nil {
+		response := CommandResponse{UserID: req.UserID, Error: err.Error()}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	response := CommandResponse{UserID: req.UserID, Output: output}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
+func main() {
+	r := mux.NewRouter()
+	r.HandleFunc("/execute", commandHandler).Methods("POST")
+	r.HandleFunc("/ws", wsHandler)
+
+	log.Fatal(http.ListenAndServe(":8080", r))
+}
