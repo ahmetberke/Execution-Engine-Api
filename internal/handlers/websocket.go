@@ -2,13 +2,16 @@ package handlers
 
 import (
 	"bufio"
+	"fmt"
+	"io"
 	"net/http"
 	"os/exec"
 
-	"github.com/gorilla/websocket"
 	"execution-engine-api/internal/container"
-	"execution-engine-api/pkg/models"
 	"execution-engine-api/internal/logger"
+	"execution-engine-api/pkg/models"
+
+	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
@@ -18,48 +21,32 @@ var upgrader = websocket.Upgrader{
 }
 
 func executeCommandOnce(userID, command string, conn *websocket.Conn) {
-	defer conn.Close() // Komut tamamlandığında bağlantıyı kapat
+	defer conn.Close()
 
 	containerName := "user_container_" + userID
-	cmd := exec.Command("docker", "exec", containerName, "bash", "-c", command)
+	cmdString := fmt.Sprintf("stdbuf -oL -eL bash -c %q", command)
+	cmd := exec.Command("docker", "exec", containerName, "bash", "-c", cmdString)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		conn.WriteMessage(websocket.TextMessage, []byte("Error: "+err.Error()))
-		logger.Log.Warn(err.Error())
 		return
 	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		conn.WriteMessage(websocket.TextMessage, []byte("Error: "+err.Error()))
-		logger.Log.Warn(err.Error())
 		return
 	}
 
 	if err := cmd.Start(); err != nil {
 		conn.WriteMessage(websocket.TextMessage, []byte("Error: "+err.Error()))
-		logger.Log.Warn(err.Error())
 		return
 	}
 
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		message := scanner.Text()
-		if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
-			logger.Log.Warn(err.Error())
-			break
-		}
-	}
-
-	scannerErr := bufio.NewScanner(stderr)
-	for scannerErr.Scan() {
-		message := scannerErr.Text()
-		if err := conn.WriteMessage(websocket.TextMessage, []byte("Error: "+message)); err != nil {
-			logger.Log.Warn(message)
-			break
-		}
-	}
+	// stdout ve stderr ayrı goroutine'lerde yazdırılıyor
+	go streamToWebSocket(conn, stdout, "")
+	go streamToWebSocket(conn, stderr, "Error: ")
 
 	cmd.Wait()
 	conn.WriteMessage(websocket.TextMessage, []byte("ExecutionFinished"))
@@ -88,4 +75,12 @@ func WSHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Her komut için ayrı WebSocket bağlantısı açıp işleyelim
 	go executeCommandOnce(req.UserID, req.Command, conn)
+}
+
+func streamToWebSocket(conn *websocket.Conn, reader io.Reader, prefix string) {
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		line := scanner.Text()
+		conn.WriteMessage(websocket.TextMessage, []byte(prefix+line))
+	}
 }

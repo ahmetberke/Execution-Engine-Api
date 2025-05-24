@@ -70,7 +70,7 @@
 
             ws.onopen = function () {
                 console.log("WebSocket connected");
-                ws.send(JSON.stringify({ user_id: "9999", command: command }));
+                ws.send(JSON.stringify({ user_id: "ahmetberke", command: command }));
             };
 
             ws.onmessage = function (event) {
@@ -78,6 +78,7 @@
                     logToTerminal("\nExecution completed.");
                     ws.close(); // Komut tamamlandığında bağlantıyı kapat
                 } else {
+                    console.log(event.data)
                     logToTerminal(event.data);
                 }
             };

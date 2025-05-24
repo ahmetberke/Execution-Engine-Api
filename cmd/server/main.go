@@ -6,18 +6,18 @@ import (
 
 	"github.com/gorilla/mux"
 	"execution-engine-api/internal/handlers"
-	"execution-engine-api/internal/logger"
+	"execution-engine-api/internal/aws"
 )
 
 func main() {
-	// Log sistemini başlat
-	logger.InitLogger()
-	logger.Log.Info("Starting Execution Engine API Server...")
+
+	aws.LoadAWSCredentials()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/execute", handlers.CommandHandler).Methods("POST")
 	r.HandleFunc("/ws", handlers.WSHandler)
 
-	logger.Log.Info("Server is running on port 8080")
+	log.Println("Server started")
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

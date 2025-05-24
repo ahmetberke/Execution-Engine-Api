@@ -80,3 +80,19 @@
 {"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T16:28:49+03:00"}
 {"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T16:28:49+03:00"}
 {"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T16:28:49+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T17:20:14+03:00"}
+{"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T17:20:14+03:00"}
+{"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T17:20:14+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T17:20:15+03:00"}
+{"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T17:20:15+03:00"}
+{"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T17:20:15+03:00"}
+{"level":"warning","msg":"Could not sync files for user 9999: failed to sync files from AWS: failed to list objects: MissingRegion: could not find region configuration","time":"2025-03-02T17:22:51+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T17:23:13+03:00"}
+{"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T17:23:13+03:00"}
+{"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T17:23:13+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T17:25:50+03:00"}
+{"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T17:25:50+03:00"}
+{"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T17:25:50+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T17:28:45+03:00"}
+{"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T17:28:45+03:00"}
+{"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T17:28:45+03:00"}
