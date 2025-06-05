@@ -4,9 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
-	"execution-engine-api/internal/handlers"
 	"execution-engine-api/internal/aws"
+	"execution-engine-api/internal/handlers"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -16,6 +17,8 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/execute", handlers.CommandHandler).Methods("POST")
 	r.HandleFunc("/ws", handlers.WSHandler)
+	r.HandleFunc("/container/init", handlers.InitContainerHandler).Methods("POST")
+	r.HandleFunc("/container/{userID}", handlers.DeleteContainerHandler).Methods("DELETE")
 
 	log.Println("Server started")
 

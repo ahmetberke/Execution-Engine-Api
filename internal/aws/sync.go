@@ -131,3 +131,75 @@ func SyncUserFiles(userID string) error {
 
 	return nil
 }
+
+// Belirli bir alt dizini (örneğin "src/") indirir
+func SyncUserSubPath(userID string, subPath string) error {
+	s3Client, err := getS3Client()
+	if err != nil {
+		return fmt.Errorf("failed to get S3 client: %w", err)
+	}
+
+	fmt.Printf(">>>> SUB PATH: %v", subPath)
+
+	prefix := fmt.Sprintf("user_clouds/%s/%s", userID, subPath) // Örn: user_clouds/abc123/src/
+	tmpDir := fmt.Sprintf("tmp/%s", userID)                     // Geçici yerel klasör
+
+	log.Println("## 1 - Temporary directory:", tmpDir)
+	if err := os.MkdirAll(tmpDir, os.ModePerm); err != nil {
+		return fmt.Errorf("failed to create temp dir: %w", err)
+	}
+
+	log.Println("## 2 - Fetching file list from S3 with prefix:", prefix)
+
+	resp, err := s3Client.ListObjectsV2(&s3.ListObjectsV2Input{
+		Bucket: aws.String(bucketName),
+		Prefix: aws.String(prefix),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to list objects: %w", err)
+	}
+
+	log.Println("## 3 - Found", len(resp.Contents), "files")
+
+	if len(resp.Contents) == 0 {
+		fmt.Println("No files found in S3 bucket for path:", prefix)
+		return nil
+	}
+
+	for _, obj := range resp.Contents {
+		key := *obj.Key
+		relPath := key[len(prefix):] // `subPath` sonrasını al
+		localFilePath := filepath.Join(tmpDir, relPath)
+
+		// Klasörleri oluştur (varsa)
+		if err := os.MkdirAll(filepath.Dir(localFilePath), os.ModePerm); err != nil {
+			return fmt.Errorf("failed to create local subdirectories: %w", err)
+		}
+
+		log.Println("Downloading file:", key, "->", localFilePath)
+
+		file, err := os.Create(localFilePath)
+		if err != nil {
+			return fmt.Errorf("failed to create file: %w", err)
+		}
+		defer file.Close()
+
+		getObj, err := s3Client.GetObject(&s3.GetObjectInput{
+			Bucket: aws.String(bucketName),
+			Key:    aws.String(key),
+		})
+		if err != nil {
+			return fmt.Errorf("failed to get object: %w", err)
+		}
+		defer getObj.Body.Close()
+
+		_, err = io.Copy(file, getObj.Body)
+		if err != nil {
+			return fmt.Errorf("failed to copy object data: %w", err)
+		}
+
+		log.Println("File successfully downloaded:", localFilePath)
+	}
+
+	return nil
+}
