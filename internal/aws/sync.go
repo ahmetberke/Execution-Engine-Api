@@ -68,8 +68,8 @@ func SyncUserFiles(userID string) error {
 		return fmt.Errorf("failed to get S3 client: %w", err)
 	}
 
-	prefix := fmt.Sprintf("user_clouds/%s/", userID) // Kullanıcının dosyalarının olduğu path
-	tmpDir := fmt.Sprintf("tmp/%s", userID)          // Geçici dizin
+	prefix := fmt.Sprintf("user_%s/", userID) // Kullanıcının dosyalarının olduğu path
+	tmpDir := fmt.Sprintf("tmp/%s", userID)   // Geçici dizin
 
 	log.Println("## 1 - Temporary directory:", tmpDir)
 
@@ -141,8 +141,8 @@ func SyncUserSubPath(userID string, subPath string) error {
 
 	fmt.Printf(">>>> SUB PATH: %v", subPath)
 
-	prefix := fmt.Sprintf("user_clouds/%s/%s", userID, subPath) // Örn: user_clouds/abc123/src/
-	tmpDir := fmt.Sprintf("tmp/%s", userID)                     // Geçici yerel klasör
+	prefix := fmt.Sprintf("user_%s/%s", userID, subPath) // Örn: user_clouds/abc123/src/
+	tmpDir := fmt.Sprintf("tmp/%s", userID)              // Geçici yerel klasör
 
 	log.Println("## 1 - Temporary directory:", tmpDir)
 	if err := os.MkdirAll(tmpDir, os.ModePerm); err != nil {

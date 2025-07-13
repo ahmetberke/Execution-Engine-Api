@@ -1,104 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Terminal</title>
-    <style>
-        body {
-            font-family: monospace;
-            background-color: #1e1e1e;
-            color: #ffffff;
-            margin: 0;
-            padding: 10px;
-        }
-        .terminal {
-            width: 100%;
-            height: 80vh;
-            background-color: black;
-            border: 1px solid #333;
-            padding: 10px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .input-line {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .prompt {
-            color: #0f0;
-            margin-right: 5px;
-        }
-        input {
-            flex-grow: 1;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 16px;
-            outline: none;
-            caret-color: white;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Execution Panel</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; max-width: 700px; margin: auto; }
+    input, button { padding: 10px; margin: 8px 0; width: 100%; font-size: 16px; }
+    label { font-weight: bold; }
+    #status { font-weight: bold; margin: 15px 0; }
+    #log { background: #111; color: #0f0; padding: 10px; height: 300px; overflow-y: auto; white-space: pre-wrap; border-radius: 6px; margin-top: 10px; font-family: monospace; }
+    button:disabled { opacity: 0.5; }
+  </style>
 </head>
 <body>
-    <h2>WebSocket Terminal</h2>
-    <div class="terminal" id="terminal"></div>
-    <div class="input-line">
-        <span class="prompt">$</span>
-        <input type="text" id="commandInput" placeholder="Enter command..." autofocus>
-    </div>
 
-    <script>
-        const terminal = document.getElementById("terminal");
-        const inputField = document.getElementById("commandInput");
+<h2>Execution Panel</h2>
 
-        function logToTerminal(message) {
-            const newLine = document.createElement("div");
-            newLine.textContent = message;
-            terminal.appendChild(newLine);
-            terminal.scrollTop = terminal.scrollHeight;
+<label>User ID:</label>
+<input type="text" id="userIdInput" placeholder="e.g. abc123" />
+
+<label>Folder Path (MinIO):</label>
+<input type="text" id="folderPathInput" placeholder="e.g. projects/ocr-demo" />
+
+<button id="startBtn">Start Container</button>
+
+<div id="status">Status: Not checked</div>
+
+<label>Command:</label>
+<input type="text" id="commandInput" placeholder="e.g. python3 main.py" disabled />
+<button id="sendBtn" disabled>Run Command</button>
+
+<div id="log"></div>
+
+<script>
+  let socket = null;
+  let userId = "";
+  const baseUrl = "http://localhost:8080";
+  const wsUrl = "ws://localhost:8080/ws/exec";
+
+  const userIdInput = document.getElementById("userIdInput");
+  const folderPathInput = document.getElementById("folderPathInput");
+  const startBtn = document.getElementById("startBtn");
+  const statusEl = document.getElementById("status");
+  const commandInput = document.getElementById("commandInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const logEl = document.getElementById("log");
+
+  // Start container
+  startBtn.addEventListener("click", async () => {
+    userId = userIdInput.value.trim();
+    const path = folderPathInput.value.trim();
+    if (!userId || !path) {
+      alert("User ID and folder path are required.");
+      return;
+    }
+
+    statusEl.textContent = "Starting container...";
+    commandInput.disabled = true;
+    sendBtn.disabled = true;
+
+    try {
+      const res = await fetch(`${baseUrl}/container/init`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, rootDir: path })
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+      }
+
+      await checkStatusWithRetry(userId);
+    } catch (err) {
+      statusEl.textContent = "Error: " + err.message;
+    }
+  });
+
+  // Retry-based status check
+  async function checkStatusWithRetry(userId, attempts = 5) {
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const res = await fetch(`${baseUrl}/container/status/${userId}`);
+        if (!res.ok) throw new Error("Container not found");
+        const data = await res.json();
+        statusEl.textContent = `Container Status: ${data.status}`;
+
+        if (data.status === "running") {
+          commandInput.disabled = false;
+          sendBtn.disabled = false;
+          return;
         }
+      } catch (err) {
+        statusEl.textContent = "Retrying... (" + (i + 1) + "/" + attempts + ")";
+      }
 
-        function sendCommand(command) {
-            if (command.trim() === "") return;
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
 
-            logToTerminal("$ " + command);
+    statusEl.textContent = "Container did not reach running state in time.";
+  }
 
-            // Yeni WebSocket bağlantısı oluştur
-            const ws = new WebSocket("ws://localhost:8080/ws");
+  // Run command via WebSocket
+  sendBtn.addEventListener("click", () => {
+    const cmd = commandInput.value.trim();
+    if (!cmd || !userId) return;
 
-            ws.onopen = function () {
-                console.log("WebSocket connected");
-                ws.send(JSON.stringify({ user_id: "ahmetberke", command: command }));
-            };
+    commandInput.disabled = true;
+    sendBtn.disabled = true;
+    logEl.textContent = "Running...\n";
 
-            ws.onmessage = function (event) {
-                if (event.data === "ExecutionFinished") {
-                    logToTerminal("\nExecution completed.");
-                    ws.close(); // Komut tamamlandığında bağlantıyı kapat
-                } else {
-                    console.log(event.data)
-                    logToTerminal(event.data);
-                }
-            };
+    socket = new WebSocket(wsUrl);
 
-            ws.onerror = function (error) {
-                logToTerminal("\nWebSocket error: " + error);
-                console.error("WebSocket error:", error);
-            };
+    socket.onopen = () => {
+      socket.send(JSON.stringify({ user_id: userId, command: cmd }));
+    };
 
-            ws.onclose = function () {
-                logToTerminal("\nConnection closed.");
-            };
-        }
+    socket.onmessage = (event) => {
+      if (event.data === "ExecutionFinished") {
+        logEl.textContent += "\n[Finished]";
+        commandInput.disabled = false;
+        sendBtn.disabled = false;
+        socket.close();
+      } else {
+        logEl.textContent += event.data + "\n";
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+    };
 
-        inputField.addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                sendCommand(inputField.value);
-                inputField.value = "";
-            }
-        });
-    </script>
+    socket.onerror = () => {
+      logEl.textContent = "WebSocket error.";
+      commandInput.disabled = false;
+      sendBtn.disabled = false;
+    };
+  });
+</script>
+
 </body>
 </html>

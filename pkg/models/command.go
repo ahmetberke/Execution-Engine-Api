@@ -1,7 +1,6 @@
 package models
 
 type CommandRequest struct {
-	UserID  string `json:"user_id"`
 	Command string `json:"command"`
 }
 

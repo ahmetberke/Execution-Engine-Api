@@ -96,3 +96,74 @@
 {"level":"info","msg":"Logger initialized successfully","time":"2025-03-02T17:28:45+03:00"}
 {"level":"info","msg":"Starting Execution Engine API Server...","time":"2025-03-02T17:28:45+03:00"}
 {"level":"info","msg":"Server is running on port 8080","time":"2025-03-02T17:28:45+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T14:34:04+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T14:37:40+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T14:41:34+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T14:43:40+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T15:04:44+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T15:27:15+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T15:50:13+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T15:50:39+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T15:50:44+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-07T15:53:21+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-08T13:38:50+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-08T13:38:59+03:00"}
+{"level":"warning","msg":"Could not sync  for user : failed to sync path from AWS: failed to list objects: XMinioInvalidObjectName: Object name contains unsupported characters.\n\tstatus code: 400, request id: 18470FFE173901A0, host id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8","time":"2025-06-08T15:09:24+03:00"}
+{"level":"warning","msg":"Could not sync  for user : failed to sync path from AWS: failed to list objects: XMinioInvalidObjectName: Object name contains unsupported characters.\n\tstatus code: 400, request id: 18471017A95B2A04, host id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8","time":"2025-06-08T15:11:14+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-08T15:18:39+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-08T15:24:20+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-08T15:38:50+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-08T15:51:33+03:00"}
+{"level":"info","msg":"Files copied to container user_container_ahmetberke","time":"2025-06-08T15:57:49+03:00"}
+{"level":"info","msg":"Files copied to container user_container_tarik","time":"2025-06-08T16:55:14+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-08T16:55:57+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-08T17:03:30+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-08T17:05:08+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-13T15:00:41+03:00"}
+{"level":"info","msg":"Files copied to container user_container_enes","time":"2025-06-13T15:01:48+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-19T19:03:27+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-19T19:03:40+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-21T17:17:11+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:22:08+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:32:46+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:36:40+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:37:57+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:41:41+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:51:47+03:00"}
+{"level":"info","msg":"Files copied to container user_container_enes","time":"2025-06-22T03:51:57+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:52:08+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:52:29+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:53:51+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:54:35+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:54:47+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:54:58+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:56:53+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T03:58:30+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T04:00:20+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T04:02:58+03:00"}
+{"level":"info","msg":"Files copied to container user_container_enes","time":"2025-06-22T04:03:03+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T04:03:14+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T04:04:02+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T04:06:17+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T04:07:07+03:00"}
+{"level":"info","msg":"Files copied to container user_container_enes","time":"2025-06-22T04:07:13+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T04:07:23+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-22T04:11:25+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-23T20:06:32+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T08:59:43+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T09:14:59+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T09:20:57+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T09:23:06+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T09:23:25+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T09:23:35+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T09:24:15+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T09:25:59+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T09:26:42+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T09:30:34+03:00"}
+{"level":"info","msg":"Files copied to container user_container_685a462f6354731b338b2c8f","time":"2025-06-24T09:32:23+03:00"}
+{"level":"info","msg":"Files copied to container user_container_685a462f6354731b338b2c8f","time":"2025-06-24T10:47:00+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T15:12:40+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-24T15:12:51+03:00"}
+{"level":"info","msg":"Files copied to container user_container_685a968c13a75eca80ce21ca","time":"2025-06-24T15:17:17+03:00"}
+{"level":"info","msg":"Logger initialized successfully","time":"2025-06-25T13:34:20+03:00"}
+{"level":"info","msg":"Files copied to container user_container_685a9b4c13a75eca80ce21cc","time":"2025-06-25T13:38:07+03:00"}

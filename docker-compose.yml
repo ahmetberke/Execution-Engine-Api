@@ -28,6 +28,7 @@ services:
       mc admin policy attach local readwrite --user minioadmin;
       mc alias list;
       "
+
   mongo:
     image: mongo:6.0
     container_name: mongodb
@@ -38,6 +39,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -51,5 +53,25 @@ services:
       - ME_CONFIG_BASICAUTH_USERNAME=admin 
       - ME_CONFIG_BASICAUTH_PASSWORD=admin 
 
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server --notify-keyspace-events Ex
+    volumes:
+      - redis-data:/data
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+      
+
 volumes:
   mongo-data:
+  redis-data:

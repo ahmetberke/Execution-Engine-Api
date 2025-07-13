@@ -2,11 +2,14 @@ package container
 
 import (
 	"bytes"
+	"context"
 	"execution-engine-api/internal/aws"
 	"execution-engine-api/internal/logger"
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"execution-engine-api/internal/db"
 )
 
 // Kullanıcının dosyalarını alıp konteyner içine kopyalar
@@ -139,4 +142,47 @@ func SyncSpecificPath(userID, rootDir string) error {
 	}
 
 	return nil
+}
+
+func IsContainerTrulyRunning(userID string) bool {
+	containerName := "user_container_" + userID
+	return containerRunning(containerName)
+}
+
+func StopAndMarkContainer(userID string) error {
+	containerName := "user_container_" + userID
+
+	// Docker stop
+	cmd := exec.Command("docker", "stop", containerName)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to stop container: %v, stderr: %s", err, stderr.String())
+	}
+
+	// MongoDB update
+	filter := map[string]interface{}{"user_id": userID}
+	update := map[string]interface{}{"status": "stopped"}
+
+	collection := db.GetCollection("containers")
+	_, err := collection.UpdateOne(context.TODO(), filter, map[string]interface{}{"$set": update})
+	if err != nil {
+		return fmt.Errorf("failed to update container status in DB: %v", err)
+	}
+
+	return nil
+}
+
+func StopAndRemoveContainer(userID string) error {
+	containerName := "user_container_" + userID
+	cmd := exec.Command("docker", "rm", "-f", containerName)
+	return cmd.Run()
+}
+
+// Docker container içeriğini tmp klasörüne çıkarır (container:/workspace → tmp/userID)
+func ExtractFilesFromContainer(containerName, userID string) error {
+	localPath := fmt.Sprintf("tmp/%s", userID)
+	cmd := exec.Command("docker", "cp", fmt.Sprintf("%s:/workspace", containerName), localPath)
+	return cmd.Run()
 }
